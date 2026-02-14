@@ -94,16 +94,16 @@ class DataAttrib(object):
 
 
 class DataAttribIntList(DataAttrib):
-    def GetValue(self, raw_value):
-        import opticchiasm as oc
+    _oc_module = None  # Set by callers that need oc.* constant resolution
 
+    def GetValue(self, raw_value):
         r = []
         parts = raw_value.split(",")
         for this in parts:
             s = this.strip()
-            if s[:3] == "oc.":
+            if s[:3] == "oc." and DataAttribIntList._oc_module is not None:
                 property_name = s[3:]
-                s2 = getattr(oc, property_name)
+                s2 = getattr(DataAttribIntList._oc_module, property_name)
                 i = int(s2)
             else:
                 i = int(s)
@@ -245,18 +245,7 @@ def SlotsPayload(ddata):
     return payload
 
 
-def MakeRegistrations():
-    # This is a function instead of in-line so it has its own address space for imports.
-    # Otherwise we get import cycles since most modules use this.
-    from vnavsrun import engineer_1
-
-    RegisterClass(PersistentClass(str, StringFactory, PrimitivePayload))
-    RegisterClass(
-        PersistentClass(engineer_1.Position, engineer_1.PositionFactory, SlotsPayload)
-    )
-
-
-MakeRegistrations()
+RegisterClass(PersistentClass(str, StringFactory, PrimitivePayload))
 
 
 class PersistentData(object):

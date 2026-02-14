@@ -1,6 +1,6 @@
 import time
 
-from vnavslib import vnavs_comms as vcomms
+from ezcomms import vnavs_comms as vcomms
 
 FILE_TRANSFER_IDLE = 0
 FILE_TRANSFER_STARTED = 1

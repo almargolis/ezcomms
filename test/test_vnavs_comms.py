@@ -7,7 +7,7 @@ import time
 
 import numpy as np
 
-from vnavslib import vnavs_comms
+from ezcomms import vnavs_comms
 
 
 # ---------------------------------------------------------------------------

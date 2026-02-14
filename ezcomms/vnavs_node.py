@@ -1,5 +1,7 @@
 import configparser
+import datetime
 import json
+import queue
 import socket
 import sys
 import time
@@ -8,9 +10,9 @@ import traceback
 import paho.mqtt.client as mqtt
 
 
-from vnavslib import vnavs_comms as vcomms
-from vnavslib import vnavs_const as vconst
-from vnavslib import vnavs_mqtt_clients as vmqtt
+from ezcomms import vnavs_comms as vcomms
+from ezcomms import vnavs_const as vconst
+from ezcomms import vnavs_mqtt_clients as vmqtt
 
 stop_process = False
 

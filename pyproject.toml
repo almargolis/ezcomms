@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "ezcomms"
+version = "0.1.0"
+description = "Communication and data layer extracted from VNAVS robotics framework"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    { name = "Albert Margolis", email = "almargolis@gmail.com" },
+]
+dependencies = [
+    "paho-mqtt",
+    "numpy",
+]
+
+[tool.setuptools.packages.find]
+include = ["ezcomms*"]

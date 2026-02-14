@@ -9,7 +9,7 @@ import time
 
 import numpy as np
 
-from vnavslib import vnavs_const as vconst
+from ezcomms import vnavs_const as vconst
 
 
 TCPIP_STD_BUFLEN = 4096
