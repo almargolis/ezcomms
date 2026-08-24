@@ -41,6 +41,7 @@ cameraman_mark_topic = "cameraman/mark"
 cameraman_orders_topic = "cameraman/orders"
 cameraman_pic_ready_topic = "cameraman/pic_ready"
 cameraman_process_topic = "cameraman/process"
+cameraman_blob_spec_topic = "cameraman/blob_spec"
 
 engineer_1_gps_topic = "engineer_1/gps"
 engineer_1_imu_topic = "engineer_1/imu"
