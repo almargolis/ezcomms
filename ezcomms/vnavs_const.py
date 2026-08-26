@@ -103,6 +103,21 @@ ini_specs = {
 }
 
 
+def read_config():
+    config = configparser.ConfigParser()
+    try:
+        config.read_file(open(config_file_path))
+    except FileNotFoundError:
+        sys.exit(
+            "Missing config file: {}\n"
+            "Create it with:\n"
+            '  python3 -c "from ezcomms import vnavs_const; vnavs_const.UpdateIni()"'.format(
+                config_file_path
+            )
+        )
+    return config
+
+
 def CheckDirectory(dir_name, source, IsWriteable=True):
     expanded_dir_name = os.path.expanduser(dir_name)  # this expands tilde in path
     if not os.path.isdir(expanded_dir_name):

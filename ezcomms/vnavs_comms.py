@@ -292,8 +292,7 @@ class SocketWrapper:
         verbose=False,
     ):
         self.buffer_len = buffer_len
-        self.config = configparser.ConfigParser()
-        self.config.read_file(open(vconst.config_file_path))
+        self.config = vconst.read_config()
         self.debug = "c"
         self.socket_host = host
         self.socket_port = port

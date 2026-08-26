@@ -1,4 +1,3 @@
-import configparser
 import datetime
 import json
 import queue
@@ -212,8 +211,7 @@ class VnavsNode:
         self.vnavs_pid = int(time.time())  # non-repeating with ~ 1 second
         self.vnavs_mid = 0  # publish() sequence
         self.wait_if_not_connected = wait_if_not_connected
-        self.config = configparser.ConfigParser()
-        self.config.read_file(open(vconst.config_file_path))
+        self.config = vconst.read_config()
         self.automatically_connect = automatically_connect
         self.automatically_handle_synchronous_messages = (
             automatically_handle_synchronous_messages
