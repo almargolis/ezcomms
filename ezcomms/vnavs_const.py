@@ -82,7 +82,13 @@ GLOBAL_IP = "8.8.8.8"  # Google DNS resolver
 NON_ROUTABLE_IP = "192.168.0.1"
 
 ini_specs = {
-    "Cameraman": {"ImageDir": VNAVS_IMAGES, "Camera": "Picamera2"},
+    "Cameraman": {
+        "ImageDir": VNAVS_IMAGES,
+        "Camera": "Picamera2",
+        "HFlip": "0",
+        "VFlip": "0",
+        "Controls": "",  # JSON object of libcamera controls, e.g. {"Sharpness": 2.0}
+    },
     "Helmsman": {
         "Type": "donkeycar",
         "I2cBus": "1",
