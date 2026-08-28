@@ -359,3 +359,26 @@ def _run_server(server):
             server.select(timeout=0.01)
         except Exception:
             break
+
+
+# ---------------------------------------------------------------------------
+# FileClient — start_transfer message format (max_width / max_height)
+# ---------------------------------------------------------------------------
+
+
+def test_file_client_start_transfer_default_resolution():
+    """start_transfer sends 4-field message with 0,0 when no resolution specified."""
+    sw = vnavs_comms.SocketWrapper()
+    sw.queue_message_z(["i", "photo.jpg", str(0), str(0)])
+    msg = sw.output_queues[sw.os_socket].get_nowait()
+    assert msg == "i\x00photo.jpg\x000\x000\x00\x01"
+    sw.os_socket.close()
+
+
+def test_file_client_start_transfer_with_resolution():
+    """start_transfer sends 4-field message with specified max_width/max_height."""
+    sw = vnavs_comms.SocketWrapper()
+    sw.queue_message_z(["i", "photo.jpg", str(320), str(240)])
+    msg = sw.output_queues[sw.os_socket].get_nowait()
+    assert msg == "i\x00photo.jpg\x00320\x00240\x00\x01"
+    sw.os_socket.close()

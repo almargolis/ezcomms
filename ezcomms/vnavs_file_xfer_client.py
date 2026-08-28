@@ -25,15 +25,18 @@ class FileClient(vcomms.SocketWrapperClient):
         self.start_time = 0
         self.timeout = False
 
-    def get_file(self, dir_code, filename, path=None, timeout=10.0):
-        self.start_transfer(dir_code=dir_code, filename=filename, path=path)
+    def get_file(self, dir_code, filename, path=None, timeout=10.0,
+                 max_width=0, max_height=0):
+        self.start_transfer(dir_code=dir_code, filename=filename, path=path,
+                            max_width=max_width, max_height=max_height)
         while True:
             if self.check_transfer(timeout=timeout):
                 return True
             if self.timeout:
                 return False
 
-    def start_transfer(self, dir_code, filename, path=None):
+    def start_transfer(self, dir_code, filename, path=None,
+                       max_width=0, max_height=0):
         self.init_file_client()
         retry_ct = 0
         while (not self.connected) and (retry_ct < 5):
@@ -63,7 +66,7 @@ class FileClient(vcomms.SocketWrapperClient):
         self.timeout = False
         self.buffer = bytearray()
         self.buf_sum = 0
-        self.queue_message_z([dir_code, filename])
+        self.queue_message_z([dir_code, filename, str(max_width), str(max_height)])
         self.start_time = time.time()
         self.select(timeout=0.1)
 
