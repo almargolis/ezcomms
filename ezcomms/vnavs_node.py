@@ -35,6 +35,7 @@ class Subscription:
         "last_payload",
         "message_queue",
         "request_only",
+        "stale_threshold",
         "topic",
     )
 
@@ -46,6 +47,7 @@ class Subscription:
         request_only=False,
         async_delivery=False,
         LatestOnly=True,
+        stale_threshold=5.0,
     ):
         self.async_delivery = async_delivery  # process asyncronously
         self.topic = topic
@@ -53,6 +55,7 @@ class Subscription:
         self.handler_method = handler
         self.handler_needs_topic = handler_needs_topic
         self.last_payload = None
+        self.stale_threshold = stale_threshold
         if LatestOnly:
             self.message_queue = None
         else:
@@ -144,6 +147,7 @@ class Counters:
 
 class VnavsNode:
     __slots__ = (
+        "_last_send_times",
         "args",
         "automatically_connect",
         "automatically_handle_synchronous_messages",
@@ -208,6 +212,7 @@ class VnavsNode:
         if port is not None:
             self.args[ARG_PORT] = port
         #
+        self._last_send_times = {}
         self.confirmation_pending = {}
         self.vnavs_pid = int(time.time())  # non-repeating with ~ 1 second
         self.vnavs_mid = 0  # publish() sequence
@@ -561,16 +566,38 @@ class VnavsNode:
                 print("JSON Error", message.payload)
         subscription = self.subscriptions[message.topic]
         # print(f"VnavsNode.on_message() PAYLOAD {payload}")
+        _is_stale = False
         if "_sendTime" in payload:
             send_time = float(payload["_sendTime"])
             send_diff = time.time() - send_time
-            if send_diff > 120:
-                print(
-                    "Node stale message {} - {} = {} {}".format(
-                        time.time(), send_time, send_diff, message.topic
+            if subscription.stale_threshold is not None:
+                if send_diff > subscription.stale_threshold:
+                    print(
+                        "DISCARD stale message topic={} age={:.1f}s threshold={:.1f}s"
+                        .format(
+                            message.topic, send_diff, subscription.stale_threshold
+                        )
                     )
-                )
-                # raise Exception("node message stale")
+                    _is_stale = True
+                elif send_diff < -2.0:
+                    print(
+                        "DISCARD future message topic={} send_diff={:.1f}s"
+                        " (clock skew?)".format(message.topic, send_diff)
+                    )
+                    _is_stale = True
+            # Clock-skew tracking: warn if consecutive _sendTime from same
+            # sender jumps by more than 60 seconds.
+            sender = payload.get("_sender")
+            if sender is not None:
+                prev = self._last_send_times.get(sender)
+                if prev is not None and abs(send_time - prev) > 60.0:
+                    print(
+                        "CLOCK JUMP sender={} prev={:.1f} now={:.1f}"
+                        " delta={:.1f}s".format(
+                            sender, prev, send_time, send_time - prev
+                        )
+                    )
+                self._last_send_times[sender] = send_time
         #
         if "_isConfirmation" in payload:
             print("on_message() Message received with confirmation:", payload)
@@ -581,6 +608,8 @@ class VnavsNode:
                 c = self.confirmation_pending[conf_id]
                 c.confirmed_time = time.time
                 c.payload = payload
+        if _is_stale:
+            return
         if subscription.async_delivery:
             # Handle immediately. Most commonly in multi-thread mode, so handler_method
             # needs to be thread safe and typically small/fast.

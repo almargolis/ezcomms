@@ -258,6 +258,34 @@ class QueueOne:
         self.message = message
 
 
+class QueueBounded:
+    """Drop-oldest queue with configurable max size."""
+
+    __slots__ = ("_items", "_maxsize", "drop_count")
+
+    def __init__(self, maxsize=50):
+        self._items = []
+        self._maxsize = maxsize
+        self.drop_count = 0
+
+    def put(self, message):
+        if len(self._items) >= self._maxsize:
+            self._items.pop(0)
+            self.drop_count += 1
+            if self.drop_count % 100 == 0:
+                print(
+                    "QueueBounded drop_count={} maxsize={}".format(
+                        self.drop_count, self._maxsize
+                    )
+                )
+        self._items.append(message)
+
+    def get_nowait(self):
+        if not self._items:
+            raise queue.Empty
+        return self._items.pop(0)
+
+
 class SocketWrapper:
     __slots__ = (
         "_stop_event",

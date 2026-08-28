@@ -25,10 +25,10 @@ class FileClient(vcomms.SocketWrapperClient):
         self.start_time = 0
         self.timeout = False
 
-    def get_file(self, dir_code, filename, path=None):
+    def get_file(self, dir_code, filename, path=None, timeout=10.0):
         self.start_transfer(dir_code=dir_code, filename=filename, path=path)
         while True:
-            if self.check_transfer():
+            if self.check_transfer(timeout=timeout):
                 return True
             if self.timeout:
                 return False
