@@ -65,7 +65,10 @@ stage_finis = "finis"
 
 DifferentialGpsClear = "clear"
 
-config_file_path = os.path.expanduser("~/vnavs.ini")
+DEFAULT_CONFIG_FILENAME = "vnavs.ini"
+LEGACY_CONFIG_PATH = os.path.expanduser("~/vnavs.ini")
+# Backwards-compatible module attribute; prefer resolve_config_path().
+config_file_path = LEGACY_CONFIG_PATH
 FAST_MQTT_PORT = 4000
 FILE_TRANSFER_PORT = 4010
 ANY_HOST = ""  # for server, bind to all networks
@@ -79,7 +82,24 @@ GLOBAL_IP = "8.8.8.8"  # Google DNS resolver
 NON_ROUTABLE_IP = "192.168.0.1"
 
 ini_specs = {
-    "Cameraman": {"ImageDir": VNAVS_IMAGES},
+    "Cameraman": {"ImageDir": VNAVS_IMAGES, "Camera": "Picamera2"},
+    "Helmsman": {
+        "Type": "donkeycar",
+        "I2cBus": "1",
+        "I2cAddress": "0x40",
+        "PwmFrequencyHz": "60",
+        "SteeringChannel": "1",
+        "ThrottleChannel": "0",
+        "SteeringLeftPwm": "460",
+        "SteeringCenterPwm": "375",
+        "SteeringRightPwm": "290",
+        "ThrottleForwardPwm": "500",
+        "ThrottleStoppedPwm": "370",
+        "ThrottleReversePwm": "220",
+        "SteeringGain": "0.012",
+        "MaxSteeringRadians": "0.6",
+        "MaxSpeedCmPerSec": "200",
+    },
     "FileClient": {
         "Host": HOST_LOCAL,
         "Port": FILE_TRANSFER_PORT,
@@ -99,20 +119,40 @@ ini_specs = {
         "ArchiveDir": VNAVS_LOGS,
     },
     "MissionControl": {"Scripts": "~/vnavs/scripts"},
-    "Navigator": {"missiondir": "~/vnavs/missions"},
+    "Navigator": {"missiondir": "~/vnavs/missions", "speed_method": "automatic"},
 }
 
 
-def read_config():
+def resolve_config_path(config_path=None):
+    """Decide which ``vnavs.ini`` to use.
+
+    Priority:
+      1. an explicit ``config_path`` (rarely needed -- e.g. a test or a tool
+         driving several robots),
+      2. ``vnavs.ini`` in the current working directory -- the normal case,
+         where each robot has a "launch directory" holding its ini plus the
+         shell scripts that start the nodes,
+      3. the legacy ``~/vnavs.ini``.
+    """
+    if config_path:
+        return os.path.expanduser(config_path)
+    cwd_ini = os.path.join(os.getcwd(), DEFAULT_CONFIG_FILENAME)
+    if os.path.isfile(cwd_ini):
+        return cwd_ini
+    return LEGACY_CONFIG_PATH
+
+
+def read_config(config_path=None):
+    resolved = resolve_config_path(config_path)
     config = configparser.ConfigParser()
     try:
-        config.read_file(open(config_file_path))
+        config.read_file(open(resolved))
     except FileNotFoundError:
         sys.exit(
             "Missing config file: {}\n"
             "Create it with:\n"
             '  python3 -c "from ezcomms import vnavs_const; vnavs_const.UpdateIni()"'.format(
-                config_file_path
+                resolved
             )
         )
     return config
@@ -134,7 +174,9 @@ def CheckDirectory(dir_name, source, IsWriteable=True):
     return expanded_dir_name
 
 
-def UpdateIni(IniPath=config_file_path):
+def UpdateIni(IniPath=None):
+    if IniPath is None:
+        IniPath = os.path.join(os.getcwd(), DEFAULT_CONFIG_FILENAME)
     config = configparser.ConfigParser()
     config.read(IniPath)
     for section_name, section_specs in ini_specs.items():

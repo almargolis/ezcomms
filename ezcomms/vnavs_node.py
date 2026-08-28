@@ -189,6 +189,7 @@ class VnavsNode:
         port=vconst.FAST_MQTT_PORT,
         streamer=False,
         verbose=True,
+        config_path=None,
     ):
         self.args = {}
         for this in sys.argv[1:]:
@@ -211,7 +212,7 @@ class VnavsNode:
         self.vnavs_pid = int(time.time())  # non-repeating with ~ 1 second
         self.vnavs_mid = 0  # publish() sequence
         self.wait_if_not_connected = wait_if_not_connected
-        self.config = vconst.read_config()
+        self.config = vconst.read_config(config_path)
         self.automatically_connect = automatically_connect
         self.automatically_handle_synchronous_messages = (
             automatically_handle_synchronous_messages
