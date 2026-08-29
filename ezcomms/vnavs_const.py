@@ -102,6 +102,7 @@ ini_specs = {
         "ThrottleForwardPwm": "500",
         "ThrottleStoppedPwm": "370",
         "ThrottleReversePwm": "220",
+        "ThrottleDeadbandPwm": "0",  # PWM counts to skip the ESC/motor deadband
         "SteeringGain": "0.012",
         "MaxSteeringRadians": "0.6",
         "MaxSpeedCmPerSec": "200",
