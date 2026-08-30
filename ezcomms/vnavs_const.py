@@ -60,6 +60,9 @@ process_log_list_topic = "process/log_list"
 process_clear_missions_topic = "process/clear_missions"
 process_result_topic = "process/result"
 
+# headless_control (Pi-side joystick driver) -> laptop mission_control display
+headless_control_status_topic = "headless_control/status"
+
 stage_init = "init"
 stage_finis = "finis"
 
@@ -131,6 +134,26 @@ ini_specs = {
     },
     "MissionControl": {"Scripts": "~/vnavs/scripts"},
     "Navigator": {"missiondir": "~/vnavs/missions", "speed_method": "automatic"},
+    "HeadlessControl": {
+        # Pi-side joystick node (python -m vnavsrun.headless_control node).
+        # Axis / button indices are pygame/SDL numbers -- run
+        # `python -m vnavsrun.headless_control probe` and wiggle each control
+        # to find yours, then set them here.
+        "JoystickIndex": "0",
+        "SteerAxis": "0",             # left stick X
+        "SteerAxisInvert": "0",
+        "ThrottleAxis": "3",          # right stick Y
+        "ThrottleAxisInvert": "1",   # up = forward
+        "DeadzoneFrac": "0.12",
+        "ThrottleMax": "0.35",        # normalized magnitude, matches Drive tab
+        "SteerMax": "0.7",
+        "DeadmanButton": "5",        # HOLD to allow drive (e.g. RB); release = stop
+        "RecordButton": "0",         # tap to start/stop log + image capture (e.g. A)
+        "EstopButton": "1",          # tap for immediate E-stop (e.g. B)
+        "PublishHz": "20",
+        "StatusHz": "5",
+        "MissionName": "headless",
+    },
 }
 
 
