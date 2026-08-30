@@ -398,6 +398,13 @@ class VnavsNode:
             except KeyboardInterrupt:
                 self.cleanup_loop()
                 sys.exit(0)
+            except SystemExit:
+                # A node's client_loop_code() (e.g. mission control on window
+                # close) called sys.exit(). The bare except: below would
+                # otherwise swallow it as an "abend" and keep looping -- which
+                # is how a closed mission control kept publishing drive orders.
+                self.cleanup_loop()
+                raise
             except:
                 exception_time = time.process_time()
                 payload = {}

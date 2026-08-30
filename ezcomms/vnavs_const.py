@@ -106,6 +106,10 @@ ini_specs = {
         "SteeringGain": "0.012",
         "MaxSteeringRadians": "0.6",
         "MaxSpeedCmPerSec": "200",
+        # Backstop deadman: max seconds a non-zero direct manual throttle may
+        # be held (republished) with no release before the helmsman forces it
+        # to zero. Guards against a stuck / zombie mission control.
+        "ManualDriveMaxHoldSeconds": "5",
     },
     "FileClient": {
         "Host": HOST_LOCAL,
