@@ -43,7 +43,7 @@ class FastMqttClient(vcomms.SocketWrapperClient):
         # leaving it here in case I discover there really are two different
         # functions that need different names.
         super().connect(**kwargs)
-        if self.on_connect is not None:
+        if self.connected and self.on_connect is not None:
             client = None  # not implemented
             userdata = None  # not implemented
             flags = None  # not implemented

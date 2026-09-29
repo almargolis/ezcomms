@@ -716,6 +716,9 @@ class SocketWrapperClient(SocketWrapper):
                 #   repeatedly until I added 65 to the exception list.
                 #   Communications seemed OK after adding 48 and 65 to lsit.
                 # socket error: [Errno 56] Socket is already connected
+                #   On macOS, errno 56 can be a permission issue that is reported as no route
+                #   to server. Correct by enabling python in System Settings → Privacy & Security → Local Network.
+                #   The change does not take effect until the terminal program is restarted, not just the tab.
                 # socket.error: [Errno 61] Connection refused
                 # socket.error: [Errno 65] No route to host
                 #   #65 experienced 3/24/24, MACOS on client attempting to connect
@@ -725,12 +728,14 @@ class SocketWrapperClient(SocketWrapper):
                 # socket.error: [Errno 111] Connection refused
                 # socket.error: [Errno 114] Operation already in progress (new, Raspbian Stretch)
                 # socket.error: [Errno 115] Operation now in progress
+                print("connect_async() errno", e.errno, e.strerror)
                 if e.errno in [56]:
                     self.connected = True
                     self.connect_in_progress = False
                     return True
                 else:
-                    if e.errno == 22:
+                    if e.errno in [22, 48]:
+                        # this clears "socket in use" errors
                         self.init_socket()
                     self.connected = False
                     self.connect_in_progress = True
