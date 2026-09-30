@@ -191,6 +191,15 @@ def read_config(config_path=None):
         )
     return config
 
+def config_getbool(config, section, option, default=False):
+    """Read a 0/1/true/false ini value, tolerating a missing section/option."""
+    try:
+        return config.getboolean(section, option)
+    except (configparser.NoSectionError, configparser.NoOptionError):
+        return default
+    except ValueError:
+        print(f"CONFIG [{section}] {option} is not boolean, using {default}")
+        return default
 
 def CheckDirectory(dir_name, source, IsWriteable=True):
     expanded_dir_name = os.path.expanduser(dir_name)  # this expands tilde in path
